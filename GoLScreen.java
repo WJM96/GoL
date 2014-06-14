@@ -12,14 +12,38 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.event.MouseInputListener;
 
+/*
+ * GoLScreen shows the 
+ * 
+ */
 
-public class GoLScreen extends JPanel implements Runnable, MouseListener, KeyListener
+public class GoLScreen extends JPanel implements MouseListener, KeyListener
 {	
+	/***********************************************************************/
+	public static void main(String[] args)
+	{
+		GoLScreen gs = new GoLScreen(512, 512, 64, 64, true);
+		gs.run();
+	}
+	/***********************************************************************/
+	
+	
+	/***********************************************************************/
+	/****  Member Variables  ***********************************************/
+	/***********************************************************************/
 	private	Color alive, dead;
 	private GoL gol;
 	private int cellWidth, cellHeight;
-	private boolean paused, running;
+	private boolean paused;
+	private boolean running;
 	private boolean showHelp;
+	private final int FRAME_DELAY = 32;		//roughly 30 fps
+	
+	
+	
+	/***********************************************************************/
+	/****  Constructor  ****************************************************/
+	/***********************************************************************/
 	
 	public GoLScreen(int w, int h, int golW, int golH, boolean wraps)
 	{
@@ -43,8 +67,8 @@ public class GoLScreen extends JPanel implements Runnable, MouseListener, KeyLis
 		cellWidth = this.getBounds().width / gol.getWidth();
 		cellHeight = this.getBounds().height / gol.getHeight();
 		
-		alive = new Color(255, 255, 255);
-		dead = new Color(0, 0, 0);
+		alive = new Color(255, 255, 255);		//white
+		dead = new Color(0, 0, 0);				//black
 		
 		JFrame jf = new JFrame("Game of Life (? for instructions)");
 		jf.setBounds(0, 0, w, h);
@@ -58,12 +82,10 @@ public class GoLScreen extends JPanel implements Runnable, MouseListener, KeyLis
 	
 	
 	
-	public GoL getGoL()
-	{
-		return gol;
-	}
-	
-	
+	/***********************************************************************/
+	/****  Constructor  ****************************************************/
+	/***********************************************************************/
+		
 	//draws the cells.
 	@Override
 	public void paint(Graphics g)
@@ -93,20 +115,17 @@ public class GoLScreen extends JPanel implements Runnable, MouseListener, KeyLis
 		if(showHelp)
 		{
 			g.setColor(alive);
-			g.drawString("Press Space to pause/unpause. Have fun!", 20, 20);
+			g.drawString("Press Space to pause/unpause. ] to step through. Have fun!", 20, 20);
 		}
 		
 	}
 	
-	//runs the simulation
-	//pre: a correctly initialized gol
-	//post: 
-	@Override
+	//runs the simulation, graphics and all
 	public void run() 
 	{
 		while(running)
 		{
-			this.update(getGraphics());
+			this.repaint();
 			
 			if(!paused)
 			{
@@ -115,7 +134,7 @@ public class GoLScreen extends JPanel implements Runnable, MouseListener, KeyLis
 			
 			try
 			{
-				Thread.sleep(32);
+				Thread.sleep(FRAME_DELAY);
 			} catch (InterruptedException e)
 			{
 				e.printStackTrace();
@@ -151,8 +170,6 @@ public class GoLScreen extends JPanel implements Runnable, MouseListener, KeyLis
 	}
 
 	//allows the user to set a cell value by clicking.
-	//pre: gol is initialized and functioning correctly, and variables cell(Width/Height) are set correctly
-	//post: a cell in gol should be changed
 	@Override
 	public void mousePressed(MouseEvent me) 
 	{
@@ -164,8 +181,7 @@ public class GoLScreen extends JPanel implements Runnable, MouseListener, KeyLis
 		catch(ArrayIndexOutOfBoundsException obe)
 		{
 			obe.printStackTrace();
-		}
-		
+		}	
 	}
 
 
@@ -192,6 +208,10 @@ public class GoLScreen extends JPanel implements Runnable, MouseListener, KeyLis
 		if(k.getKeyChar() == '/')
 		{
 			showHelp = !showHelp;
+		}
+		if(k.getKeyChar() == ']')
+		{
+			gol.tick();
 		}
 		
 	}
